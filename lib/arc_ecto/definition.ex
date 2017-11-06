@@ -12,6 +12,7 @@ defmodule Arc.Ecto.Definition do
       end
 
       def url({%{file_name: file_name, updated_at: updated_at}, scope}, version, options) do
+        IO.inspect file_name, label: "file_name"
         url = super({file_name, scope}, version, options)
 
         if options[:signed] do
@@ -34,6 +35,9 @@ defmodule Arc.Ecto.Definition do
       def delete({%{file_name: file_name, updated_at: _updated_at}, scope}), do: super({file_name, scope})
 
       def delete(args), do: super(args)
+
+      #defoverridable [url: 3]
+
     end
   end
 end

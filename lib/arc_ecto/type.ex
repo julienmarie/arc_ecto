@@ -4,12 +4,14 @@ defmodule Arc.Ecto.Type do
   @filename_with_timestamp ~r{^(.*)\?(\d+)$}
 
   # Support embeds_one/embeds_many
-  def cast(_definition, %{"file_name" => file, "updated_at" => updated_at}) do
+  def cast(definition, %{"file_name" => file, "updated_at" => updated_at}) do
+
     {:ok, %{file_name: file, updated_at: updated_at}}
   end
   def cast(definition, args) do
     case definition.store(args) do
-      {:ok, file} -> {:ok, %{file_name: file, updated_at: Ecto.DateTime.utc}}
+      {:ok, file} ->
+        {:ok, %{file_name: file, updated_at: Ecto.DateTime.utc}}
       _ -> :error
     end
   end
@@ -19,7 +21,7 @@ defmodule Arc.Ecto.Type do
       case Regex.match?(@filename_with_timestamp, value) do
         true ->
           [_, file_name, gsec] = Regex.run(@filename_with_timestamp, value)
-          {file_name, gsec}
+          {"#{file_name}", gsec}
         _ -> {value, nil}
       end
 
@@ -33,14 +35,18 @@ defmodule Arc.Ecto.Type do
         nil
     end
 
-    {:ok, %{file_name: file_name, updated_at: updated_at}}
+    {:ok,  file_name}
   end
 
-  def dump(_definition, %{file_name: file_name, updated_at: nil}) do
+  def dump(_definition,data) do
+    _dump(data)
+  end
+
+  def _dump(%{file_name: file_name, updated_at: nil})  do
     {:ok, file_name}
   end
 
-  def dump(_definition, %{file_name: file_name, updated_at: updated_at}) do
+  def _dump(%{file_name: file_name, updated_at: updated_at}) do
     gsec = :calendar.datetime_to_gregorian_seconds(Ecto.DateTime.to_erl(updated_at))
     {:ok, "#{file_name}?#{gsec}"}
   end
